@@ -20,10 +20,8 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.view.ActionMode;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -106,10 +104,22 @@ public class CatalogActivity extends AppCompatActivity {
         // to get a Cursor that contains all rows from the pets table.
 //        Cursor cursor = db.rawQuery("SELECT * FROM " + PetEntry.TABLE_NAME, null);
         //----------------------------- rawQuery ----------------------------
-        String[] projection = { PetEntry.COLUMN_PET_BREED, PetEntry.COLUMN_PET_WEGHT };
-        String selection = PetEntry.COLUMN_PET_GENDER + "=?";
-        String[] selectionArgs =   { String.valueOf(PetEntry.GENDER_FEMALE)};
-        Cursor cursor = db.query(PetEntry.TABLE_NAME,projection,selection,selectionArgs,
+//        String[] projection = { PetEntry.COLUMN_PET_BREED, PetEntry.COLUMN_PET_WEGHT };
+//        String selection = PetEntry.COLUMN_PET_GENDER + "=?";
+//        String[] selectionArgs =   { String.valueOf(PetEntry.GENDER_FEMALE)};
+//        Cursor cursor = db.query(PetEntry.TABLE_NAME,projection,selection,selectionArgs,
+//                null,null,null);
+        // SELECT * FROM pets;
+        String[] projection = { PetEntry._ID,
+                PetEntry.COLUMN_PET_NAME,
+                PetEntry.COLUMN_PET_BREED,
+                PetEntry.COLUMN_PET_GENDER,
+                PetEntry.COLUMN_PET_WEGHT };
+
+        Cursor cursor = db.query(PetEntry.TABLE_NAME,
+                projection,
+                null,
+                null,
                 null,null,null);
 
 
@@ -119,6 +129,18 @@ public class CatalogActivity extends AppCompatActivity {
             // pets table in the database).
             TextView displayView = (TextView) findViewById(R.id.text_view_pet);
             displayView.setText("Number of rows in pets database table: " + cursor.getCount());
+            displayView.append("\n\n" + PetEntry._ID + " - " +
+            PetEntry.COLUMN_PET_NAME);
+//
+            int idColumnIndex = cursor.getColumnIndex(PetEntry._ID);
+            int nameColumnIndex = cursor.getColumnIndex(PetEntry.COLUMN_PET_NAME);
+//
+            while(cursor.moveToNext()){
+                int currentID = cursor.getInt(idColumnIndex);
+                String currentName = cursor.getString(nameColumnIndex);
+                displayView.append("\n" + currentID + " - " + currentName);
+            }
+
         } finally {
             // Always close the cursor when you're done reading from it. This releases all its
 
