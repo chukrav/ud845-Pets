@@ -101,9 +101,19 @@ public class CatalogActivity extends AppCompatActivity {
         // Create and/or open a database to read from it
         SQLiteDatabase db = mDbHelper.getReadableDatabase();
 
+        //------------------------ rawQuery  -------------------------------
         // Perform this raw SQL query "SELECT * FROM pets"
         // to get a Cursor that contains all rows from the pets table.
-        Cursor cursor = db.rawQuery("SELECT * FROM " + PetEntry.TABLE_NAME, null);
+//        Cursor cursor = db.rawQuery("SELECT * FROM " + PetEntry.TABLE_NAME, null);
+        //----------------------------- rawQuery ----------------------------
+        String[] projection = { PetEntry.COLUMN_PET_BREED, PetEntry.COLUMN_PET_WEGHT };
+        String selection = PetEntry.COLUMN_PET_GENDER + "=?";
+        String[] selectionArgs =   { String.valueOf(PetEntry.GENDER_FEMALE)};
+        Cursor cursor = db.query(PetEntry.TABLE_NAME,projection,selection,selectionArgs,
+                null,null,null);
+
+
+
         try {
             // Display the number of rows in the Cursor (which reflects the number of rows in the
             // pets table in the database).
