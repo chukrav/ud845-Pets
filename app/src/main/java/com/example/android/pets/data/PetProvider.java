@@ -3,6 +3,7 @@ package com.example.android.pets.data;
 import android.content.ContentProvider;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.UriMatcher;
 import android.database.Cursor;
 import android.net.Uri;
 import android.support.annotation.NonNull;
@@ -15,6 +16,26 @@ public class PetProvider extends ContentProvider {
     public static final String LOG_TAG = PetProvider.class.getSimpleName();
     private  Context mContext;
     private PetDbHelper mDbHelper;
+
+    /** URI matcher code for the content URI for the pets table */
+    private static final int PETS = 100;
+
+    /** URI matcher code for the content URI for a single pet in the pets table */
+    private static final int PET_ID = 101;
+
+    //It's common to use NO_MATCH as the input for this case.
+    private static final UriMatcher sUriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
+
+    static {
+        // The calls to addURI() go here, for all of the content URI patterns that the provider
+        // should recognize. All paths added to the UriMatcher have a corresponding code to return
+        // when a match is found.
+
+        // TODO: Add 2 content URIs to URI matcher
+        sUriMatcher.addURI(PetContract.CONTENT_AUTHORITY,PetContract.PATH_PETS,PETS);
+        sUriMatcher.addURI(PetContract.CONTENT_AUTHORITY,PetContract.PATH_PETS+"/#",PET_ID);
+    }
+
 
     @Override
     public boolean onCreate() {
