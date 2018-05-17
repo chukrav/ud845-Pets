@@ -131,6 +131,21 @@ public class PetProvider extends ContentProvider {
     private Uri insertPet(Uri uri, ContentValues values) {
 
         // TODO: Insert a new pet into the pets database table with the given ContentValues
+        String name = values.getAsString(PetEntry.COLUMN_PET_NAME);
+        if (name == null){
+            throw new IllegalArgumentException("Pet requires a name");
+        }
+
+        Integer gender = values.getAsInteger(PetEntry.COLUMN_PET_GENDER);
+        if (gender == null || !PetEntry.isValidGender(gender)){
+            throw new IllegalArgumentException("Pet requires a gender");
+        }
+
+        Integer weight = values.getAsInteger(PetEntry.COLUMN_PET_WEGHT);
+        if (weight == null || weight < 0){
+            throw new IllegalArgumentException("Pet requires a valid weight");
+        }
+
 
         // Once we know the ID of the new row in the table,
         // return the new URI with the ID appended to the end of it

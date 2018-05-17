@@ -26,6 +26,13 @@ public final class PetContract {
 
         public static final Uri CONTENT_URI = Uri.withAppendedPath(BASE_CONTENT_URI,PATH_PETS);
 
+        public static boolean isValidGender(int gender) {
+            if (gender == GENDER_FEMALE || gender == GENDER_MALE || gender == GENDER_UNKNOWN){
+                return true;
+            }
+            return false;
+        }
+
 
 
     }
