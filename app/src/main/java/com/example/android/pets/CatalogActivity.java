@@ -25,7 +25,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.TextView;
+import android.widget.ListView;
 
 import static com.example.android.pets.data.PetContract.PetEntry;
 
@@ -55,6 +55,8 @@ public class CatalogActivity extends AppCompatActivity {
         displayDatabaseInfo();
 //        PetDbHelper mDbHelper = new PetDbHelper(this);
 //        SQLiteDatabase db = mDbHelper.getReadableDatabase();
+
+
     }
 
 
@@ -123,31 +125,34 @@ public class CatalogActivity extends AppCompatActivity {
                 null,
                 null);
 
+        ListView lvItems  = (ListView) findViewById(R.id.list);
+        PetCursorAdapter adapter = new PetCursorAdapter(this,cursor);
+        lvItems.setAdapter(adapter);
 
 
-        try {
+//        try {
             // Display the number of rows in the Cursor (which reflects the number of rows in the
             // pets table in the database).
-            TextView displayView = (TextView) findViewById(R.id.text_view_pet);
-            displayView.setText("Number of rows in pets database table: " + cursor.getCount());
-            displayView.append("\n\n" + PetEntry._ID + " - " +
-            PetEntry.COLUMN_PET_NAME);
+//            TextView displayView = (TextView) findViewById(R.id.text_view_pet);
+//            displayView.setText("Number of rows in pets database table: " + cursor.getCount());
+//            displayView.append("\n\n" + PetEntry._ID + " - " +
+//            PetEntry.COLUMN_PET_NAME);
 //
-            int idColumnIndex = cursor.getColumnIndex(PetEntry._ID);
-            int nameColumnIndex = cursor.getColumnIndex(PetEntry.COLUMN_PET_NAME);
+//            int idColumnIndex = cursor.getColumnIndex(PetEntry._ID);
+//            int nameColumnIndex = cursor.getColumnIndex(PetEntry.COLUMN_PET_NAME);
 //
-            while(cursor.moveToNext()){
-                int currentID = cursor.getInt(idColumnIndex);
-                String currentName = cursor.getString(nameColumnIndex);
-                displayView.append("\n" + currentID + " - " + currentName);
-            }
+//            while(cursor.moveToNext()){
+//                int currentID = cursor.getInt(idColumnIndex);
+//                String currentName = cursor.getString(nameColumnIndex);
+//                displayView.append("\n" + currentID + " - " + currentName);
+//            }
 
-        } finally {
+//        } finally {
             // Always close the cursor when you're done reading from it. This releases all its
 
             // resources and makes it invalid.
-            cursor.close();
-        }
+//            cursor.close();
+//        }
     }
 
     private void insertPet() {
@@ -168,4 +173,5 @@ public class CatalogActivity extends AppCompatActivity {
         super.onStart();
         displayDatabaseInfo();
     }
+
 }
