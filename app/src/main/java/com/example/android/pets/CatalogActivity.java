@@ -126,6 +126,9 @@ public class CatalogActivity extends AppCompatActivity {
                 null);
 
         ListView lvItems  = (ListView) findViewById(R.id.list);
+        // Find and set empty view on the ListView, so that it only shows when the list has 0 items.
+        View emptyView = findViewById(R.id.empty_view);
+        lvItems.setEmptyView(emptyView);
         PetCursorAdapter adapter = new PetCursorAdapter(this,cursor);
         lvItems.setAdapter(adapter);
 
