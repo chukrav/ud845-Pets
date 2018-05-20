@@ -45,7 +45,6 @@ public class CatalogActivity extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_catalog);
-//        mDbHelper = new PetDbHelper(this);
 
         // Setup FAB to open EditorActivity
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
@@ -57,9 +56,6 @@ public class CatalogActivity extends AppCompatActivity
             }
         });
 
-//        displayDatabaseInfo();
-//        PetDbHelper mDbHelper = new PetDbHelper(this);
-//        SQLiteDatabase db = mDbHelper.getReadableDatabase();
 
         ListView petListView = (ListView) findViewById(R.id.list);
         View emptyView = findViewById(R.id.empty_view);
@@ -89,7 +85,7 @@ public class CatalogActivity extends AppCompatActivity
             case R.id.action_insert_dummy_data:
                 // Do nothing for now
                 insertPet();
-                displayDatabaseInfo();
+//                displayDatabaseInfo();
                 return true;
             // Respond to a click on the "Delete all entries" menu option
             case R.id.action_delete_all_entries:
@@ -103,74 +99,6 @@ public class CatalogActivity extends AppCompatActivity
      * Temporary helper method to display information in the onscreen TextView about the state of
      * the pets database.
      */
-    private void displayDatabaseInfo() {
-        // To access our database, we instantiate our subclass of SQLiteOpenHelper
-        // and pass the context, which is the current activity.
-//        mDbHelper = new PetDbHelper(this);
-
-        // Create and/or open a database to read from it
-//        SQLiteDatabase db = mDbHelper.getReadableDatabase();
-
-        //------------------------ rawQuery  -------------------------------
-        // Perform this raw SQL query "SELECT * FROM pets"
-        // to get a Cursor that contains all rows from the pets table.
-//        Cursor cursor = db.rawQuery("SELECT * FROM " + PetEntry.TABLE_NAME, null);
-        //----------------------------- rawQuery ----------------------------
-//        String[] projection = { PetEntry.COLUMN_PET_BREED, PetEntry.COLUMN_PET_WEGHT };
-//        String selection = PetEntry.COLUMN_PET_GENDER + "=?";
-//        String[] selectionArgs =   { String.valueOf(PetEntry.GENDER_FEMALE)};
-//        Cursor cursor = db.query(PetEntry.TABLE_NAME,projection,selection,selectionArgs,
-//                null,null,null);
-        // SELECT * FROM pets;
-        String[] projection = {PetEntry._ID,
-                PetEntry.COLUMN_PET_NAME,
-                PetEntry.COLUMN_PET_BREED,
-                PetEntry.COLUMN_PET_GENDER,
-                PetEntry.COLUMN_PET_WEGHT};
-
-//        Cursor cursor = db.query(PetEntry.TABLE_NAME,
-//                projection,
-//                null,
-//                null,
-//                null,null,null);
-        Cursor cursor = getContentResolver().query(PetEntry.CONTENT_URI, projection,
-                null,
-                null,
-                null);
-
-        ListView lvItems = (ListView) findViewById(R.id.list);
-        // Find and set empty view on the ListView, so that it only shows when the list has 0 items.
-        View emptyView = findViewById(R.id.empty_view);
-        lvItems.setEmptyView(emptyView);
-        mCursorAdapter = new PetCursorAdapter(this, cursor);
-        lvItems.setAdapter(mCursorAdapter);
-
-
-//        try {
-        // Display the number of rows in the Cursor (which reflects the number of rows in the
-        // pets table in the database).
-//            TextView displayView = (TextView) findViewById(R.id.text_view_pet);
-//            displayView.setText("Number of rows in pets database table: " + cursor.getCount());
-//            displayView.append("\n\n" + PetEntry._ID + " - " +
-//            PetEntry.COLUMN_PET_NAME);
-//
-//            int idColumnIndex = cursor.getColumnIndex(PetEntry._ID);
-//            int nameColumnIndex = cursor.getColumnIndex(PetEntry.COLUMN_PET_NAME);
-//
-//            while(cursor.moveToNext()){
-//                int currentID = cursor.getInt(idColumnIndex);
-//                String currentName = cursor.getString(nameColumnIndex);
-//                displayView.append("\n" + currentID + " - " + currentName);
-//            }
-
-//        } finally {
-        // Always close the cursor when you're done reading from it. This releases all its
-
-        // resources and makes it invalid.
-//            cursor.close();
-//        }
-    }
-
     private void insertPet() {
         // TODO: Insert a single pet into the database
 //        SQLiteDatabase db = mDbHelper.getWritableDatabase();
@@ -182,12 +110,6 @@ public class CatalogActivity extends AppCompatActivity
 //        long newRowId = db.insert(PetEntry.TABLE_NAME, null, values);
         Uri newUri = getContentResolver().insert(PetEntry.CONTENT_URI, values);
 
-    }
-
-    @Override
-    protected void onStart() {
-        super.onStart();
-        displayDatabaseInfo();
     }
 
     @Override
