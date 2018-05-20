@@ -15,8 +15,11 @@
  */
 package com.example.android.pets;
 
+import android.app.LoaderManager;
 import android.content.ContentValues;
+import android.content.CursorLoader;
 import android.content.Intent;
+import android.content.Loader;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
@@ -32,9 +35,11 @@ import static com.example.android.pets.data.PetContract.PetEntry;
 /**
  * Displays list of pets that were entered and stored in the app.
  */
-public class CatalogActivity extends AppCompatActivity {
+public class CatalogActivity extends AppCompatActivity
+        implements LoaderManager.LoaderCallbacks<Cursor> {
 
-//    private PetDbHelper mDbHelper;
+    private static int PET_LOADER = 0;
+    private PetCursorAdapter mCursorAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,10 +57,18 @@ public class CatalogActivity extends AppCompatActivity {
             }
         });
 
-        displayDatabaseInfo();
+//        displayDatabaseInfo();
 //        PetDbHelper mDbHelper = new PetDbHelper(this);
 //        SQLiteDatabase db = mDbHelper.getReadableDatabase();
 
+        ListView petListView = (ListView) findViewById(R.id.list);
+        View emptyView = findViewById(R.id.empty_view);
+        petListView.setEmptyView(emptyView);
+
+        mCursorAdapter = new PetCursorAdapter(this,null);
+        petListView.setAdapter(mCursorAdapter);
+
+        getLoaderManager().initLoader(PET_LOADER, null, this);
 
     }
 
@@ -109,33 +122,33 @@ public class CatalogActivity extends AppCompatActivity {
 //        Cursor cursor = db.query(PetEntry.TABLE_NAME,projection,selection,selectionArgs,
 //                null,null,null);
         // SELECT * FROM pets;
-        String[] projection = { PetEntry._ID,
+        String[] projection = {PetEntry._ID,
                 PetEntry.COLUMN_PET_NAME,
                 PetEntry.COLUMN_PET_BREED,
                 PetEntry.COLUMN_PET_GENDER,
-                PetEntry.COLUMN_PET_WEGHT };
+                PetEntry.COLUMN_PET_WEGHT};
 
 //        Cursor cursor = db.query(PetEntry.TABLE_NAME,
 //                projection,
 //                null,
 //                null,
 //                null,null,null);
-        Cursor cursor = getContentResolver().query(PetEntry.CONTENT_URI,projection,
+        Cursor cursor = getContentResolver().query(PetEntry.CONTENT_URI, projection,
                 null,
                 null,
                 null);
 
-        ListView lvItems  = (ListView) findViewById(R.id.list);
+        ListView lvItems = (ListView) findViewById(R.id.list);
         // Find and set empty view on the ListView, so that it only shows when the list has 0 items.
         View emptyView = findViewById(R.id.empty_view);
         lvItems.setEmptyView(emptyView);
-        PetCursorAdapter adapter = new PetCursorAdapter(this,cursor);
-        lvItems.setAdapter(adapter);
+        mCursorAdapter = new PetCursorAdapter(this, cursor);
+        lvItems.setAdapter(mCursorAdapter);
 
 
 //        try {
-            // Display the number of rows in the Cursor (which reflects the number of rows in the
-            // pets table in the database).
+        // Display the number of rows in the Cursor (which reflects the number of rows in the
+        // pets table in the database).
 //            TextView displayView = (TextView) findViewById(R.id.text_view_pet);
 //            displayView.setText("Number of rows in pets database table: " + cursor.getCount());
 //            displayView.append("\n\n" + PetEntry._ID + " - " +
@@ -151,9 +164,9 @@ public class CatalogActivity extends AppCompatActivity {
 //            }
 
 //        } finally {
-            // Always close the cursor when you're done reading from it. This releases all its
+        // Always close the cursor when you're done reading from it. This releases all its
 
-            // resources and makes it invalid.
+        // resources and makes it invalid.
 //            cursor.close();
 //        }
     }
@@ -177,4 +190,25 @@ public class CatalogActivity extends AppCompatActivity {
         displayDatabaseInfo();
     }
 
+    @Override
+    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+        String[] projection = {PetEntry._ID,
+                PetEntry.COLUMN_PET_NAME,
+                PetEntry.COLUMN_PET_BREED};
+//                PetEntry.COLUMN_PET_GENDER,
+//                PetEntry.COLUMN_PET_WEGHT};
+
+        return new CursorLoader(this, PetEntry.CONTENT_URI, projection,
+                null, null, null);
+    }
+
+    @Override
+    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+        mCursorAdapter.swapCursor(data);
+    }
+
+    @Override
+    public void onLoaderReset(Loader<Cursor> loader) {
+        mCursorAdapter.swapCursor(null);
+    }
 }
