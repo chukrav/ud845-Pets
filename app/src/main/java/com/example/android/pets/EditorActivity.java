@@ -17,11 +17,16 @@ package com.example.android.pets;
 
 import android.content.ContentValues;
 import android.content.Intent;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.v4.app.LoaderManager;
 import android.support.v4.app.NavUtils;
+import android.support.v4.content.CursorLoader;
+import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -39,18 +44,27 @@ import static com.example.android.pets.data.PetContract.PetEntry;
 /**
  * Allows user to create a new pet or edit an existing one.
  */
-public class EditorActivity extends AppCompatActivity {
+public class EditorActivity extends AppCompatActivity
+        implements LoaderManager.LoaderCallbacks<Cursor> {
 
-    /** EditText field to enter the pet's name */
+    /**
+     * EditText field to enter the pet's name
+     */
     private EditText mNameEditText;
 
-    /** EditText field to enter the pet's breed */
+    /**
+     * EditText field to enter the pet's breed
+     */
     private EditText mBreedEditText;
 
-    /** EditText field to enter the pet's weight */
+    /**
+     * EditText field to enter the pet's weight
+     */
     private EditText mWeightEditText;
 
-    /** EditText field to enter the pet's gender */
+    /**
+     * EditText field to enter the pet's gender
+     */
     private Spinner mGenderSpinner;
 
     /**
@@ -76,7 +90,8 @@ public class EditorActivity extends AppCompatActivity {
 
         Intent intent = getIntent();
         Uri currentUri = intent.getData();
-        if (currentUri != null){
+        if (currentUri != null) {
+            Log.v("URICHECK", currentUri.toString());
             setTitle("Edit Pet");
         } else {
             setTitle("Add Pet");
@@ -170,11 +185,41 @@ public class EditorActivity extends AppCompatActivity {
 //        long newRowId = db.insert(PetEntry.TABLE_NAME, null, values);
 //        Log.v("INSERT_PET"," "+newRowId);
 //
-        Uri newUri = getContentResolver().insert(PetEntry.CONTENT_URI,values);
-        if (newUri == null){
-            Toast.makeText(this,R.string.editor_insert_pet_failed, Toast.LENGTH_LONG).show();
+        Uri newUri = getContentResolver().insert(PetEntry.CONTENT_URI, values);
+        if (newUri == null) {
+            Toast.makeText(this, R.string.editor_insert_pet_failed, Toast.LENGTH_LONG).show();
         } else {
-            Toast.makeText(this,R.string.editor_insert_pet_successful, Toast.LENGTH_LONG).show();
+            Toast.makeText(this, R.string.editor_insert_pet_successful, Toast.LENGTH_LONG).show();
         }
+    }
+
+    @Override
+    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+        String[] projection = {PetEntry._ID,
+                PetEntry.COLUMN_PET_NAME,
+                PetEntry.COLUMN_PET_BREED,
+                PetEntry.COLUMN_PET_GENDER,
+                PetEntry.COLUMN_PET_WEGHT};
+
+        return new CursorLoader(this, PetEntry.CONTENT_URI, projection,
+                null, null, null);
+    }
+
+    @Override
+    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+        String name = data.getString(data.getColumnIndex(PetEntry.COLUMN_PET_NAME));
+        String breed = data.getString(data.getColumnIndex(PetEntry.COLUMN_PET_BREED));
+        Integer gender = data.getInt(data.getColumnIndex(PetEntry.COLUMN_PET_GENDER));
+        Integer weight = data.getInt(data.getColumnIndex(PetEntry.COLUMN_PET_WEGHT));
+        mNameEditText.setText(name);
+        mBreedEditText.setText(breed);
+        mGenderSpinner.setSelection(gender);
+        mWeightEditText.setText(String.valueOf(weight));
+
+    }
+
+    @Override
+    public void onLoaderReset(Loader<Cursor> loader) {
+
     }
 }
