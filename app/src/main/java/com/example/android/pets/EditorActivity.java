@@ -20,10 +20,10 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.v4.app.LoaderManager;
+import android.app.LoaderManager;
 import android.support.v4.app.NavUtils;
-import android.support.v4.content.CursorLoader;
-import android.support.v4.content.Loader;
+import android.content.CursorLoader;
+import android.content.Loader;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.util.Log;
@@ -75,6 +75,9 @@ public class EditorActivity extends AppCompatActivity
 
     private PetDbHelper mDbHelper;
 
+    private static final int PET_LOADER = 2;
+    private Uri mCurrentUri;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -89,15 +92,16 @@ public class EditorActivity extends AppCompatActivity
         mGenderSpinner = (Spinner) findViewById(R.id.spinner_gender);
 
         Intent intent = getIntent();
-        Uri currentUri = intent.getData();
-        if (currentUri != null) {
-            Log.v("URICHECK", currentUri.toString());
+        mCurrentUri = intent.getData();
+        if (mCurrentUri != null) {
+//            Log.v("URICHECK", mCurrentUri.toString());
             setTitle("Edit Pet");
         } else {
             setTitle("Add Pet");
         }
 
         setupSpinner();
+        getLoaderManager().initLoader(PET_LOADER, null, this);
     }
 
     /**
@@ -157,7 +161,7 @@ public class EditorActivity extends AppCompatActivity
             // Respond to a click on the "Save" menu option
             case R.id.action_save:
                 // Do nothing for now
-                insertPet();
+                savetPet();
                 finish();
                 return true;
             // Respond to a click on the "Delete" menu option
@@ -173,7 +177,7 @@ public class EditorActivity extends AppCompatActivity
         return super.onOptionsItemSelected(item);
     }
 
-    private void insertPet() {
+    private void savetPet() {
         // TODO: Insert a single pet into the database
 //        SQLiteDatabase db = mDbHelper.getWritableDatabase();
         ContentValues values = new ContentValues();
@@ -185,12 +189,27 @@ public class EditorActivity extends AppCompatActivity
 //        long newRowId = db.insert(PetEntry.TABLE_NAME, null, values);
 //        Log.v("INSERT_PET"," "+newRowId);
 //
-        Uri newUri = getContentResolver().insert(PetEntry.CONTENT_URI, values);
-        if (newUri == null) {
-            Toast.makeText(this, R.string.editor_insert_pet_failed, Toast.LENGTH_LONG).show();
+        int i = 0;
+        Uri newUri = null;
+
+//        String toastMessange = getResources().getString(R.string.editor_insert_pet_failed);;
+        if (mCurrentUri == null) {
+            newUri = getContentResolver().insert(PetEntry.CONTENT_URI, values);
+            if (mCurrentUri == null) {
+                Toast.makeText(this, R.string.editor_insert_pet_failed, Toast.LENGTH_LONG).show();
+            } else {
+                Toast.makeText(this, R.string.editor_insert_pet_successful, Toast.LENGTH_LONG).show();
+            }
         } else {
-            Toast.makeText(this, R.string.editor_insert_pet_successful, Toast.LENGTH_LONG).show();
+            i = getContentResolver().update(mCurrentUri, values, null, null);
+            if (i == 0) {
+                Toast.makeText(this, R.string.editor_update_pet_failed, Toast.LENGTH_LONG).show();
+            } else {
+                Toast.makeText(this, R.string.editor_update_pet_successful, Toast.LENGTH_LONG).show();
+            }
         }
+
+
     }
 
     @Override
@@ -201,25 +220,47 @@ public class EditorActivity extends AppCompatActivity
                 PetEntry.COLUMN_PET_GENDER,
                 PetEntry.COLUMN_PET_WEGHT};
 
-        return new CursorLoader(this, PetEntry.CONTENT_URI, projection,
+        return new CursorLoader(this, mCurrentUri, projection,
                 null, null, null);
     }
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-        String name = data.getString(data.getColumnIndex(PetEntry.COLUMN_PET_NAME));
-        String breed = data.getString(data.getColumnIndex(PetEntry.COLUMN_PET_BREED));
-        Integer gender = data.getInt(data.getColumnIndex(PetEntry.COLUMN_PET_GENDER));
-        Integer weight = data.getInt(data.getColumnIndex(PetEntry.COLUMN_PET_WEGHT));
-        mNameEditText.setText(name);
-        mBreedEditText.setText(breed);
-        mGenderSpinner.setSelection(gender);
-        mWeightEditText.setText(String.valueOf(weight));
+        if (data.moveToFirst()) {
+            String name = data.getString(data.getColumnIndex(PetEntry.COLUMN_PET_NAME));
+            String breed = data.getString(data.getColumnIndex(PetEntry.COLUMN_PET_BREED));
+            Integer gender = data.getInt(data.getColumnIndex(PetEntry.COLUMN_PET_GENDER));
+            Integer weight = data.getInt(data.getColumnIndex(PetEntry.COLUMN_PET_WEGHT));
+            mNameEditText.setText(name);
+            mBreedEditText.setText(breed);
+            mGenderSpinner.setSelection(gender);
+            mWeightEditText.setText(String.valueOf(weight));
+
+//            From solution ???!!! ---------------------------
+            // Gender is a dropdown spinner, so map the constant value from the database
+            // into one of the dropdown options (0 is Unknown, 1 is Male, 2 is Female).
+            // Then call setSelection() so that option is displayed on screen as the current selection.
+//            switch (gender) {
+//                case PetEntry.GENDER_MALE:
+//                    mGenderSpinner.setSelection(1);
+//                    break;
+//                case PetEntry.GENDER_FEMALE:
+//                    mGenderSpinner.setSelection(2);
+//                    break;
+//                default:
+//                    mGenderSpinner.setSelection(0);
+//                    break;
+//            }
+        }
 
     }
 
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
+        mNameEditText.setText("");
+        mBreedEditText.setText("");
+        mGenderSpinner.setSelection(PetEntry.GENDER_UNKNOWN);
+        mWeightEditText.setText("");
 
     }
 }
