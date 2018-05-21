@@ -76,5 +76,8 @@
 
     <!-- Subtitle text for the empty view that prompts the user to add a pet [CHAR LIMIT=50] -->
     <string name="empty_view_subtitle_text">Get started by adding a pet</string>
+    <string name="unsaved_changes_dialog_msg">You have ansaved canges</string>
+    <string name="discard">Discard changes?</string>
+    <string name="keep_editing">Keep rditing</string>
 
 </resources>
