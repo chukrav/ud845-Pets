@@ -180,35 +180,44 @@ public class EditorActivity extends AppCompatActivity
     private void savetPet() {
         // TODO: Insert a single pet into the database
 //        SQLiteDatabase db = mDbHelper.getWritableDatabase();
-        ContentValues values = new ContentValues();
-        values.put(PetContract.PetEntry.COLUMN_PET_NAME, mNameEditText.getText().toString());
-        values.put(PetContract.PetEntry.COLUMN_PET_BREED, mBreedEditText.getText().toString());
-        values.put(PetEntry.COLUMN_PET_GENDER, mGender);
-        values.put(PetEntry.COLUMN_PET_WEGHT,
-                Integer.parseInt(mWeightEditText.getText().toString()));
+        String name = mNameEditText.getText().toString().trim();
+        String breed = mBreedEditText.getText().toString().trim();
+//        mGender;
+        String sWeight = mWeightEditText.getText().toString().trim();
+
+        if (!TextUtils.isEmpty(name) || !TextUtils.isEmpty(breed) || mGender != PetEntry.GENDER_UNKNOWN) {
+            int weight = 0;
+            if (!TextUtils.isEmpty(sWeight))
+                weight = Integer.parseInt(sWeight);
+
+            ContentValues values = new ContentValues();
+            values.put(PetContract.PetEntry.COLUMN_PET_NAME, name);
+            values.put(PetContract.PetEntry.COLUMN_PET_BREED, breed);
+            values.put(PetEntry.COLUMN_PET_GENDER, mGender);
+            values.put(PetEntry.COLUMN_PET_WEGHT, weight);
 //        long newRowId = db.insert(PetEntry.TABLE_NAME, null, values);
 //        Log.v("INSERT_PET"," "+newRowId);
 //
-        int i = 0;
-        Uri newUri = null;
+            int i = 0;
+            Uri newUri = null;
 
 //        String toastMessange = getResources().getString(R.string.editor_insert_pet_failed);;
-        if (mCurrentUri == null) {
-            newUri = getContentResolver().insert(PetEntry.CONTENT_URI, values);
             if (mCurrentUri == null) {
-                Toast.makeText(this, R.string.editor_insert_pet_failed, Toast.LENGTH_LONG).show();
+                newUri = getContentResolver().insert(PetEntry.CONTENT_URI, values);
+                if (mCurrentUri == null) {
+                    Toast.makeText(this, R.string.editor_insert_pet_failed, Toast.LENGTH_LONG).show();
+                } else {
+                    Toast.makeText(this, R.string.editor_insert_pet_successful, Toast.LENGTH_LONG).show();
+                }
             } else {
-                Toast.makeText(this, R.string.editor_insert_pet_successful, Toast.LENGTH_LONG).show();
-            }
-        } else {
-            i = getContentResolver().update(mCurrentUri, values, null, null);
-            if (i == 0) {
-                Toast.makeText(this, R.string.editor_update_pet_failed, Toast.LENGTH_LONG).show();
-            } else {
-                Toast.makeText(this, R.string.editor_update_pet_successful, Toast.LENGTH_LONG).show();
+                i = getContentResolver().update(mCurrentUri, values, null, null);
+                if (i == 0) {
+                    Toast.makeText(this, R.string.editor_update_pet_failed, Toast.LENGTH_LONG).show();
+                } else {
+                    Toast.makeText(this, R.string.editor_update_pet_successful, Toast.LENGTH_LONG).show();
+                }
             }
         }
-
 
     }
 
