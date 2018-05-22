@@ -39,7 +39,6 @@ import android.widget.Spinner;
 import android.widget.Toast;
 
 import com.example.android.pets.data.PetContract;
-import com.example.android.pets.data.PetDbHelper;
 
 import static com.example.android.pets.data.PetContract.PetEntry;
 
@@ -192,6 +191,7 @@ public class EditorActivity extends AppCompatActivity
             case R.id.action_delete:
                 // Do nothing for now
                 showDeleteConfirmationDialog();
+
                 return true;
             // Respond to a click on the "Up" arrow button in the app bar
             case android.R.id.home:
@@ -237,7 +237,8 @@ public class EditorActivity extends AppCompatActivity
 //        mGender;
         String sWeight = mWeightEditText.getText().toString().trim();
 
-        if (TextUtils.isEmpty(name) || TextUtils.isEmpty(breed) || mGender == PetEntry.GENDER_UNKNOWN) {
+//        if (TextUtils.isEmpty(name) || TextUtils.isEmpty(breed) || mGender == PetEntry.GENDER_UNKNOWN) {
+        if (TextUtils.isEmpty(name) && mGender == PetEntry.GENDER_UNKNOWN) {
             return;
         }
         int weight = 0;
@@ -374,7 +375,11 @@ public class EditorActivity extends AppCompatActivity
         builder.setPositiveButton(R.string.delete, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
                 // User clicked the "Delete" button, so delete the pet.
+                if (dialog != null) {
+                    dialog.dismiss();
+                }
                 deletePet();
+                finish();
             }
         });
         builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
@@ -398,11 +403,12 @@ public class EditorActivity extends AppCompatActivity
     private void deletePet() {
         // TODO: Implement this method
         int mRowsDeleted = 0;
-        mRowsDeleted = getContentResolver().delete(mCurrentUri,null,null);
-        if (mRowsDeleted > 0){
-            Toast.makeText(this,R.string.editor_delete_pet_successful,Toast.LENGTH_LONG);
+//        if (mCurrentPetUri != null) { ... in tutorial
+        mRowsDeleted = getContentResolver().delete(mCurrentUri, null, null);
+        if (mRowsDeleted > 0) {
+            Toast.makeText(this, R.string.editor_delete_pet_successful, Toast.LENGTH_SHORT).show();
         } else {
-            Toast.makeText(this,R.string.editor_delete_pet_failed,Toast.LENGTH_LONG);
+            Toast.makeText(this, R.string.editor_delete_pet_failed, Toast.LENGTH_SHORT).show();
         }
 
     }
