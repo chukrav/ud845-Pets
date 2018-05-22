@@ -16,19 +16,18 @@
 package com.example.android.pets;
 
 import android.app.AlertDialog;
+import android.app.LoaderManager;
 import android.content.ContentValues;
+import android.content.CursorLoader;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.Loader;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
-import android.app.LoaderManager;
 import android.support.v4.app.NavUtils;
-import android.content.CursorLoader;
-import android.content.Loader;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
@@ -83,6 +82,7 @@ public class EditorActivity extends AppCompatActivity
 
     private boolean mPetHasChanged = false;
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -101,6 +101,7 @@ public class EditorActivity extends AppCompatActivity
         if (mCurrentUri != null) {
 //            Log.v("URICHECK", mCurrentUri.toString());
             setTitle("Edit Pet");
+            invalidateOptionsMenu();
         } else {
             setTitle("Add Pet");
         }
@@ -112,6 +113,17 @@ public class EditorActivity extends AppCompatActivity
         mGenderSpinner.setOnTouchListener(mOnTouchListener);
 
         getLoaderManager().initLoader(PET_LOADER, null, this);
+    }
+
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        super.onPrepareOptionsMenu(menu);
+        if (mCurrentUri == null){
+            MenuItem menuItem = (MenuItem)findViewById(R.id.action_delete);
+            menuItem.setVisible(false);
+        }
+
+        return true;
     }
 
     /**
