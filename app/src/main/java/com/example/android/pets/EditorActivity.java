@@ -75,7 +75,7 @@ public class EditorActivity extends AppCompatActivity
      */
     private int mGender = PetContract.PetEntry.GENDER_UNKNOWN;
 
-    private PetDbHelper mDbHelper;
+//    private PetDbHelper mDbHelper;
 
     private static final int PET_LOADER = 2;
     private Uri mCurrentUri;
@@ -88,7 +88,19 @@ public class EditorActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_editor);
 
-        mDbHelper = new PetDbHelper(this);
+        Intent intent = getIntent();
+        mCurrentUri = intent.getData();
+        if (mCurrentUri != null) {
+            // Otherwise this is an existing pet, so change app bar to say "Edit Pet"
+            setTitle("Edit Pet");
+            // Initialize a loader to read the pet data from the database
+            // and display the current values in the editor
+            getLoaderManager().initLoader(PET_LOADER, null, this);
+            invalidateOptionsMenu();
+        } else {
+            // This is a new pet, so change the app bar to say "Add a Pet"
+            setTitle("Add Pet");
+        }
 
         // Find all relevant views that we will need to read user input from
         mNameEditText = (EditText) findViewById(R.id.edit_pet_name);
@@ -96,30 +108,20 @@ public class EditorActivity extends AppCompatActivity
         mWeightEditText = (EditText) findViewById(R.id.edit_pet_weight);
         mGenderSpinner = (Spinner) findViewById(R.id.spinner_gender);
 
-        Intent intent = getIntent();
-        mCurrentUri = intent.getData();
-        if (mCurrentUri != null) {
-//            Log.v("URICHECK", mCurrentUri.toString());
-            setTitle("Edit Pet");
-            invalidateOptionsMenu();
-        } else {
-            setTitle("Add Pet");
-        }
-
-        setupSpinner();
         mNameEditText.setOnTouchListener(mOnTouchListener);
         mBreedEditText.setOnTouchListener(mOnTouchListener);
         mWeightEditText.setOnTouchListener(mOnTouchListener);
         mGenderSpinner.setOnTouchListener(mOnTouchListener);
 
-        getLoaderManager().initLoader(PET_LOADER, null, this);
+        setupSpinner();
+
     }
 
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
         super.onPrepareOptionsMenu(menu);
-        if (mCurrentUri == null){
-            MenuItem menuItem = (MenuItem)findViewById(R.id.action_delete);
+        if (mCurrentUri == null) {
+            MenuItem menuItem = (MenuItem) findViewById(R.id.action_delete);
             menuItem.setVisible(false);
         }
 
@@ -189,6 +191,7 @@ public class EditorActivity extends AppCompatActivity
             // Respond to a click on the "Delete" menu option
             case R.id.action_delete:
                 // Do nothing for now
+                showDeleteConfirmationDialog();
                 return true;
             // Respond to a click on the "Up" arrow button in the app bar
             case android.R.id.home:
@@ -234,7 +237,7 @@ public class EditorActivity extends AppCompatActivity
 //        mGender;
         String sWeight = mWeightEditText.getText().toString().trim();
 
-        if (!TextUtils.isEmpty(name) || !TextUtils.isEmpty(breed) || mGender != PetEntry.GENDER_UNKNOWN) {
+        if (TextUtils.isEmpty(name) || TextUtils.isEmpty(breed) || mGender == PetEntry.GENDER_UNKNOWN) {
             return;
         }
         int weight = 0;
@@ -360,6 +363,47 @@ public class EditorActivity extends AppCompatActivity
         mBreedEditText.setText("");
         mGenderSpinner.setSelection(PetEntry.GENDER_UNKNOWN);
         mWeightEditText.setText("");
+
+    }
+
+    private void showDeleteConfirmationDialog() {
+        // Create an AlertDialog.Builder and set the message, and click listeners
+        // for the postivie and negative buttons on the dialog.
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setMessage(R.string.delete_dialog_msg);
+        builder.setPositiveButton(R.string.delete, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                // User clicked the "Delete" button, so delete the pet.
+                deletePet();
+            }
+        });
+        builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                // User clicked the "Cancel" button, so dismiss the dialog
+                // and continue editing the pet.
+                if (dialog != null) {
+                    dialog.dismiss();
+                }
+            }
+        });
+
+        // Create and show the AlertDialog
+        AlertDialog alertDialog = builder.create();
+        alertDialog.show();
+    }
+
+    /**
+     * Perform the deletion of the pet in the database.
+     */
+    private void deletePet() {
+        // TODO: Implement this method
+        int mRowsDeleted = 0;
+        mRowsDeleted = getContentResolver().delete(mCurrentUri,null,null);
+        if (mRowsDeleted > 0){
+            Toast.makeText(this,R.string.editor_delete_pet_successful,Toast.LENGTH_LONG);
+        } else {
+            Toast.makeText(this,R.string.editor_delete_pet_failed,Toast.LENGTH_LONG);
+        }
 
     }
 }

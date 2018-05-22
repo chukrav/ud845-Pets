@@ -31,6 +31,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import static com.example.android.pets.data.PetContract.PetEntry;
 
@@ -54,7 +55,10 @@ public class CatalogActivity extends AppCompatActivity
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(CatalogActivity.this, EditorActivity.class);
+//                Uri currentPetUri = null;
+//                intent.setData(currentPetUri);
                 startActivity(intent);
+                Toast.makeText(CatalogActivity.this,"Instead of Editor",Toast.LENGTH_LONG).show();
             }
         });
 
