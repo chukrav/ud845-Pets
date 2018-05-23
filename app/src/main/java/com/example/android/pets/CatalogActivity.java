@@ -60,14 +60,18 @@ public class CatalogActivity extends AppCompatActivity
 //                Uri currentPetUri = null;
 //                intent.setData(currentPetUri);
                 startActivity(intent);
-                Toast.makeText(CatalogActivity.this,"Instead of Editor",Toast.LENGTH_LONG).show();
+//                Toast.makeText(CatalogActivity.this,"Instead of Editor",Toast.LENGTH_LONG).show();
             }
         });
-
 
         ListView petListView = (ListView) findViewById(R.id.list);
         View emptyView = findViewById(R.id.empty_view);
         petListView.setEmptyView(emptyView);
+
+        mCursorAdapter = new PetCursorAdapter(this, null);
+        petListView.setAdapter(mCursorAdapter);
+
+
         petListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
@@ -79,9 +83,7 @@ public class CatalogActivity extends AppCompatActivity
             }
         });
 
-        mCursorAdapter = new PetCursorAdapter(this, null);
-        petListView.setAdapter(mCursorAdapter);
-
+        // Kick off the loader
         getLoaderManager().initLoader(PET_LOADER, null, this);
 
     }

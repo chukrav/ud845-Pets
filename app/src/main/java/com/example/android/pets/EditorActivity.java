@@ -95,10 +95,11 @@ public class EditorActivity extends AppCompatActivity
             // Initialize a loader to read the pet data from the database
             // and display the current values in the editor
             getLoaderManager().initLoader(PET_LOADER, null, this);
-            invalidateOptionsMenu();
+
         } else {
             // This is a new pet, so change the app bar to say "Add a Pet"
             setTitle("Add Pet");
+            invalidateOptionsMenu();
         }
 
         // Find all relevant views that we will need to read user input from
@@ -238,7 +239,14 @@ public class EditorActivity extends AppCompatActivity
         String sWeight = mWeightEditText.getText().toString().trim();
 
 //        if (TextUtils.isEmpty(name) || TextUtils.isEmpty(breed) || mGender == PetEntry.GENDER_UNKNOWN) {
-        if (TextUtils.isEmpty(name) && mGender == PetEntry.GENDER_UNKNOWN) {
+//        if (TextUtils.isEmpty(name) && mGender == PetEntry.GENDER_UNKNOWN) {
+//            return;
+//        }
+        if (mCurrentUri == null &&
+                TextUtils.isEmpty(name) && TextUtils.isEmpty(breed) &&
+                TextUtils.isEmpty(sWeight) && mGender == PetEntry.GENDER_UNKNOWN) {
+            // Since no fields were modified, we can return early without creating a new pet.
+            // No need to create ContentValues and no need to do any ContentProvider operations.
             return;
         }
         int weight = 0;
@@ -259,7 +267,7 @@ public class EditorActivity extends AppCompatActivity
 //        String toastMessange = getResources().getString(R.string.editor_insert_pet_failed);;
         if (mCurrentUri == null) {
             newUri = getContentResolver().insert(PetEntry.CONTENT_URI, values);
-            if (mCurrentUri == null) {
+            if (newUri == null) {
                 Toast.makeText(this, R.string.editor_insert_pet_failed, Toast.LENGTH_LONG).show();
             } else {
                 Toast.makeText(this, R.string.editor_insert_pet_successful, Toast.LENGTH_LONG).show();
@@ -329,6 +337,11 @@ public class EditorActivity extends AppCompatActivity
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+        // Bail early if the cursor is null or there is less than 1 row in the cursor
+        if (data == null || data.getCount() < 1) {
+            return;
+        }
+
         if (data.moveToFirst()) {
             String name = data.getString(data.getColumnIndex(PetEntry.COLUMN_PET_NAME));
             String breed = data.getString(data.getColumnIndex(PetEntry.COLUMN_PET_BREED));
@@ -336,24 +349,24 @@ public class EditorActivity extends AppCompatActivity
             Integer weight = data.getInt(data.getColumnIndex(PetEntry.COLUMN_PET_WEGHT));
             mNameEditText.setText(name);
             mBreedEditText.setText(breed);
-            mGenderSpinner.setSelection(gender);
+//            mGenderSpinner.setSelection(gender);
             mWeightEditText.setText(String.valueOf(weight));
 
 //            From solution ???!!! ---------------------------
             // Gender is a dropdown spinner, so map the constant value from the database
             // into one of the dropdown options (0 is Unknown, 1 is Male, 2 is Female).
             // Then call setSelection() so that option is displayed on screen as the current selection.
-//            switch (gender) {
-//                case PetEntry.GENDER_MALE:
-//                    mGenderSpinner.setSelection(1);
-//                    break;
-//                case PetEntry.GENDER_FEMALE:
-//                    mGenderSpinner.setSelection(2);
-//                    break;
-//                default:
-//                    mGenderSpinner.setSelection(0);
-//                    break;
-//            }
+            switch (gender) {
+                case PetEntry.GENDER_MALE:
+                    mGenderSpinner.setSelection(1);
+                    break;
+                case PetEntry.GENDER_FEMALE:
+                    mGenderSpinner.setSelection(2);
+                    break;
+                default:
+                    mGenderSpinner.setSelection(0);
+                    break;
+            }
         }
 
     }
@@ -362,7 +375,8 @@ public class EditorActivity extends AppCompatActivity
     public void onLoaderReset(Loader<Cursor> loader) {
         mNameEditText.setText("");
         mBreedEditText.setText("");
-        mGenderSpinner.setSelection(PetEntry.GENDER_UNKNOWN);
+//        mGenderSpinner.setSelection(PetEntry.GENDER_UNKNOWN); // Mine
+        mGenderSpinner.setSelection(0); // Select "Unknown" gender
         mWeightEditText.setText("");
 
     }
@@ -375,11 +389,11 @@ public class EditorActivity extends AppCompatActivity
         builder.setPositiveButton(R.string.delete, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
                 // User clicked the "Delete" button, so delete the pet.
-                if (dialog != null) {
-                    dialog.dismiss();
-                }
+//                if (dialog != null) {    // ?????
+//                    dialog.dismiss();   // ?????
+//                }   // ?????
                 deletePet();
-                finish();
+//                finish();   // ?????
             }
         });
         builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
@@ -403,13 +417,14 @@ public class EditorActivity extends AppCompatActivity
     private void deletePet() {
         // TODO: Implement this method
         int mRowsDeleted = 0;
-//        if (mCurrentPetUri != null) { ... in tutorial
-        mRowsDeleted = getContentResolver().delete(mCurrentUri, null, null);
-        if (mRowsDeleted > 0) {
-            Toast.makeText(this, R.string.editor_delete_pet_successful, Toast.LENGTH_SHORT).show();
-        } else {
-            Toast.makeText(this, R.string.editor_delete_pet_failed, Toast.LENGTH_SHORT).show();
+        if (mCurrentUri != null) { //... in tutorial
+            mRowsDeleted = getContentResolver().delete(mCurrentUri, null, null);
+            if (mRowsDeleted > 0) {
+                Toast.makeText(this, R.string.editor_delete_pet_successful, Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(this, R.string.editor_delete_pet_failed, Toast.LENGTH_SHORT).show();
+            }
         }
-
+        finish();
     }
 }
